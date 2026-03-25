@@ -1,0 +1,21 @@
+# ── Web UI ──────────────────────────────────
+streamlit>=1.35
+
+# ── LLM providers ───────────────────────────
+langchain-google-genai        # Gemini (primary)
+langchain-groq                # Groq (fallback when Gemini quota exhausted)
+
+# ── LangChain core + graph ───────────────────
+langchain-core
+langchain-community
+langgraph
+
+# ── MCP client ──────────────────────────────
+langchain-mcp-adapters
+fastmcp
+
+# ── Database ────────────────────────────────
+aiomysql
+
+# ── Utilities ───────────────────────────────
+python-dotenv
