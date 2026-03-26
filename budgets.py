@@ -1,6 +1,4 @@
-"""
-budgets.py
-──────────
+
 All budget and savings-goal MCP tools for the Expense Tracker server.
 Registered onto the FastMCP instance passed in from server.py via register(mcp).
 
@@ -75,11 +73,26 @@ def _validate_amount(a: float, field: str = "amount") -> None:
         raise ValueError(f"'{field}' must be >= 0, got: {a}")
 
 
+
 def _month_start(month_str: str) -> str:
     """
     Normalise any of 'YYYY-MM' or 'YYYY-MM-DD' to 'YYYY-MM-01'.
-    This keeps all month keys consistent across the budgets table.
+    Safety net for natural-language inputs the LLM might accidentally send.
     """
+    from datetime import timedelta
+    s = month_str.strip().lower()
+
+    today = date.today()
+    if s in ("this month", "current month", "thismonth"):
+        return today.strftime("%Y-%m-01")
+    if s in ("last month", "previous month", "lastmonth", "prev month"):
+        first_of_this = today.replace(day=1)
+        last_m = first_of_this - timedelta(days=1)
+        return last_m.strftime("%Y-%m-01")
+    if s in ("next month",):
+        y, m = today.year, today.month
+        return f"{y}-{m+1:02d}-01" if m < 12 else f"{y+1}-01-01"
+
     s = month_str.strip()
     try:
         if len(s) == 7:
@@ -91,7 +104,6 @@ def _month_start(month_str: str) -> str:
     except ValueError:
         pass
     raise ValueError(f"'month' must be YYYY-MM or YYYY-MM-DD, got: {month_str!r}")
-
 
 def _month_end(month_start: str) -> str:
     """Return the first day of the NEXT month — used for exclusive range queries."""
